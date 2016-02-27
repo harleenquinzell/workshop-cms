@@ -3,6 +3,7 @@ var querystring = require('querystring');
 
 function handler(req, res) {
   var endpoint = req.url;
+  var jsonFile = './src/posts.json';
 
   if (endpoint === '/') {
     res.writeHead(200, {"Content-Type": "text/html"});
@@ -13,9 +14,16 @@ function handler(req, res) {
       }
       res.end(file);
     });
+  } else if (endpoint === '/posts') {
+    fs.readFile(jsonFile, function(error, file){
+      if (error) {
+        console.log(error);
+        return;
+      }
+      res.end(file);
+    });
 
   } else if (endpoint === '/create/post') {
-    var jsonFile = './src/posts.json';
     var blogPosts;
     var newPost;
     var allTheData = '';
@@ -28,13 +36,16 @@ function handler(req, res) {
     req.on('end', function() {
       console.log('got all data!', allTheData);
       newPost = querystring.parse(allTheData);
+      newPost = newPost.post;
 
       fs.readFile(jsonFile, function(error, file) {
         if (error) {
           console.log(error);
           return;
         }
+        console.log('raw', file);
         blogPosts = JSON.parse(file);
+
         blogPosts[timestamp] = newPost;
 
         fs.writeFile(jsonFile, JSON.stringify(blogPosts), function(error) {
