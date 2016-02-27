@@ -1,8 +1,6 @@
 var http = require('http');
 var fs = require('fs');
 
-// var message = "I\'m very happy this morning!";
-
 function handler(req, res) {
   var endpoint = req.url;
   var method = req.method;
@@ -16,9 +14,20 @@ function handler(req, res) {
       }
       res.end(file);
     });
+
+  } else {
+
+    var fileExtension = endpoint.split('.')[1];
+
+    res.writeHead(200, {"Content-Type": "text/" + fileExtension });
+    fs.readFile(__dirname + '/public' + endpoint, function(error, file) {
+      if (error) {
+        console.log(error);
+        return;
+      }
+      res.end(file);
+    });
   }
-  console.log(endpoint);
-  console.log(method);
 }
 
 var server = http.createServer(handler);
